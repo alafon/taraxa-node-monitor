@@ -1,0 +1,28 @@
+services:
+  reverse_proxy:
+    container_name: reverse_proxy
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    environment:
+      - COMPANION_AUTH_BEARER_TOKEN
+      - COMPANION_NOAUTH_IP
+
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./nginx_reverse_proxy.conf.template:/etc/nginx/templates/nginx_reverse_proxy.conf.template:ro
+  cadvisor:
+    restart: unless-stopped
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes: 
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/dev/disk/:/dev/disk"
+    privileged: true
+    devices: 
+      - "/dev/kmsg"
+    command:
+      - --url_base_prefix=/cadvisor

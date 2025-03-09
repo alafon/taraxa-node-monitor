@@ -1,0 +1,32 @@
+map $remote_addr $allowed_address {
+    default 0;
+    ${COMPANION_NOAUTH_IP} 1;  
+}
+
+server {
+    listen 8080;
+
+    if ($http_authorization != "Bearer ${COMPANION_AUTH_BEARER_TOKEN}") {
+        set $test no-auth;
+    }
+
+    if ($allowed_address = 0) {
+        set $test "${test}-no-address";
+    }
+
+    if ($test = no-auth-no-address) {
+        return 403;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location /cadvisor {
+        proxy_pass http://cadvisor:8080;
+    }
+
+    location /metrics {
+        proxy_pass http://node:8888/metrics;
+    }
+}
