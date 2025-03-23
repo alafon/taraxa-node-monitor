@@ -23,3 +23,19 @@ scrape_configs:
       credentials: {{TARAXA_NODE_PROXY_AUTH_CREDENTIALS}}
     static_configs:
       - targets: [{{TARAXA_NODE_VALIDATORS}}]
+
+  - job_name: json
+    metrics_path: /probe
+    params:
+      module: [default]
+    static_configs:
+      - targets:
+        - https://rpc.mainnet.taraxa.io
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        ## Location of the json exporter's real <hostname>:<port>
+        replacement: host.docker.internal:7979 # equivalent to "localhost:7979"

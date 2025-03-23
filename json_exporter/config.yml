@@ -1,0 +1,10 @@
+---
+modules:
+  default:
+    body:
+      content: |
+        {"jsonrpc":"2.0","method":"taraxa_getChainStats","params":[],"id":1}
+    metrics:
+    - name: pbft_period
+      path: '{ .result.pbft_period }'
+      help: pbft_period from the mainnet dev rpc 

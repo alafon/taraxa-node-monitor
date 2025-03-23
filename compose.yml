@@ -1,5 +1,12 @@
 services:
 
+  json_exporter:
+    image: quay.io/prometheuscommunity/json-exporter
+    volumes:
+      - ./json_exporter/config.yml:/config.yml:ro
+    ports:
+      - 7979:7979
+
   prometheus:
     build: prometheus
     restart: unless-stopped
