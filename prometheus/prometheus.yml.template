@@ -24,10 +24,11 @@ scrape_configs:
     static_configs:
       - targets: [{{TARAXA_NODE_VALIDATORS}}]
 
-  - job_name: json
+  - job_name: json_chain_stats
     metrics_path: /probe
+    scrape_interval: 1m
     params:
-      module: [default]
+      module: [chain_stats]
     static_configs:
       - targets:
         - https://rpc.mainnet.taraxa.io
@@ -37,5 +38,20 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        ## Location of the json exporter's real <hostname>:<port>
+        replacement: json_exporter:7979
+
+  - job_name: json_node_stats
+    metrics_path: /probe
+    scrape_interval: 1m
+    params:
+      module: [node_stats]
+    static_configs:
+      - targets: [{{TARAXA_NODE_VALIDATORS_STATS_URL}}]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+        replacement: "https://indexer.mainnet.explorer.taraxa.io/address/${1}/stats"
+      - source_labels: [__address__]
+        target_label: "instance"
+      - target_label: __address__
         replacement: json_exporter:7979

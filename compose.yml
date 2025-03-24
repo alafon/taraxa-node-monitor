@@ -16,6 +16,7 @@ services:
       - TARAXA_NODE_VALIDATORS
       - TARAXA_NODE_PROXY_AUTH_TYPE
       - TARAXA_NODE_PROXY_AUTH_CREDENTIALS
+      - TARAXA_NODE_VALIDATORS_STATS_URL
     volumes:
       - ./prometheus/prometheus.yml.template:/etc/prometheus/prometheus.yml.template
       - prometheus_data:/prometheus

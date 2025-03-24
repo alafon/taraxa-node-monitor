@@ -1,6 +1,6 @@
 ---
 modules:
-  default:
+  chain_stats:
     body:
       content: |
         {"jsonrpc":"2.0","method":"taraxa_getChainStats","params":[],"id":1}
@@ -8,3 +8,18 @@ modules:
     - name: pbft_period
       path: '{ .result.pbft_period }'
       help: pbft_period from the mainnet dev rpc 
+
+  node_stats:
+    metrics:
+    - name: dag_blocks_produced
+      path: '{ .dagsCount }'
+      help: DAG blocks produced by the node
+    - name: pbft_blocks_produced
+      path: '{ .pbftCount }'
+      help: PBFT blocks produced by the node
+    - name: dag_last_block_timestamp
+      path: '{ .lastDagTimestamp }'
+      help: Last DAG block timestamp
+    - name: pbft_last_block_timestamp
+      path: '{ .lastPbftTimestamp }'
+      help: Last PBFT block timestamp
