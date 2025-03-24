@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -181,6 +180,7 @@
         "type": "prometheus",
         "uid": "tmn_prometheus"
       },
+      "description": "Current instance vs network",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -193,10 +193,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -205,7 +201,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 3,
+        "w": 5,
         "x": 6,
         "y": 1
       },
@@ -214,7 +210,7 @@
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "auto",
+        "orientation": "vertical",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
@@ -223,7 +219,7 @@
           "fields": "",
           "values": false
         },
-        "showPercentChange": false,
+        "showPercentChange": true,
         "textMode": "auto",
         "wideLayout": true
       },
@@ -237,67 +233,10 @@
           "editorMode": "code",
           "expr": "pbft_period{instance=\"$instance\"}",
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "current",
           "range": true,
           "refId": "A"
-        }
-      ],
-      "title": "Node pbft period",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "tmn_prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 9,
-        "y": 1
-      },
-      "id": 21,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
@@ -305,13 +244,14 @@
           },
           "editorMode": "code",
           "expr": "pbft_period{instance=\"https://rpc.mainnet.taraxa.io\"}",
+          "hide": false,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "mainnet",
           "range": true,
-          "refId": "A"
+          "refId": "B"
         }
       ],
-      "title": "Mainnet current pbft period",
+      "title": "PBFT periods",
       "type": "stat"
     },
     {
@@ -388,12 +328,7 @@
               "id": "byFrameRefID",
               "options": "disk"
             },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "/dev/sdb"
-              }
-            ]
+            "properties": []
           }
         ]
       },
@@ -407,8 +342,7 @@
       "options": {
         "legend": {
           "calcs": [
-            "max",
-            "stdDev"
+            "lastNotNull"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -431,18 +365,18 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "container_fs_usage_bytes{device=\"/dev/sdb\", instance=\"$instance\"}",
+          "expr": "container_fs_usage_bytes{device=\"$data_disk\", instance=\"$instance\", id=\"/\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{device}}",
           "range": true,
           "refId": "disk",
           "useBackend": false
         }
       ],
-      "title": "Data disk",
+      "title": "Disk usage",
       "type": "timeseries"
     },
     {
@@ -1493,6 +1427,7 @@
       "type": "stat"
     }
   ],
+  "preload": false,
   "refresh": "5s",
   "schemaVersion": 40,
   "tags": [],
@@ -1542,6 +1477,27 @@
         "refresh": 1,
         "regex": "/[\\s]*\\s(.*)\\s.*/",
         "type": "query"
+      },
+      {
+        "current": {
+          "text": "/dev/md1",
+          "value": "/dev/md1"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "tmn_prometheus"
+        },
+        "definition": "label_values(container_fs_usage_bytes,device)",
+        "name": "data_disk",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(container_fs_usage_bytes,device)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       }
     ]
   },
@@ -1552,6 +1508,6 @@
   "timepicker": {},
   "timezone": "",
   "title": "Taraxa Mainnet Node",
-  "version": 22,
+  "version": 23,
   "weekStart": ""
 }
