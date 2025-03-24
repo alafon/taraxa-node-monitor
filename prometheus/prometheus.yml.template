@@ -38,4 +38,4 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         ## Location of the json exporter's real <hostname>:<port>
-        replacement: host.docker.internal:7979 # equivalent to "localhost:7979"
+        replacement: json_exporter:7979
