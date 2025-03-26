@@ -15,6 +15,15 @@ scrape_configs:
       credentials: {{TARAXA_NODE_PROXY_AUTH_CREDENTIALS}}
     static_configs:
       - targets: [{{TARAXA_NODE_VALIDATORS}}]
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "(0x.*)@(.*)"
+        target_label: "node_address"
+        replacement: "${1}"
+      - source_labels: [__address__]
+        regex: "(0x.*@)?(.*)"
+        target_label: "__address__"
+        replacement: "${2}"
 
   - job_name: taraxa_node_cadvisor
     metrics_path: /cadvisor/metrics
@@ -23,6 +32,15 @@ scrape_configs:
       credentials: {{TARAXA_NODE_PROXY_AUTH_CREDENTIALS}}
     static_configs:
       - targets: [{{TARAXA_NODE_VALIDATORS}}]
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "(0x.*)@(.*)"
+        target_label: "node_address"
+        replacement: "${1}"
+      - source_labels: [__address__]
+        regex: "(0x.*@)?(.*)"
+        target_label: "__address__"
+        replacement: "${2}"
 
   - job_name: json_chain_stats
     metrics_path: /probe
@@ -51,6 +69,8 @@ scrape_configs:
       - source_labels: [__address__]
         target_label: __param_target
         replacement: "https://indexer.mainnet.explorer.taraxa.io/address/${1}/stats"
+      - source_labels: [__address__]
+        target_label: "node_address"
       - source_labels: [__address__]
         target_label: "instance"
       - target_label: __address__
