@@ -3,10 +3,10 @@ global:
 
 scrape_configs:
 
-  - job_name: prometheus
-    static_configs:
-      - targets:
-          - prometheus:9090
+  #- job_name: prometheus
+  #  static_configs:
+  #    - targets:
+  #        - prometheus:9090
 
   - job_name: taraxa_node
     metrics_path: /metrics
@@ -16,14 +16,31 @@ scrape_configs:
     static_configs:
       - targets: [{{TARAXA_NODE_VALIDATORS}}]
     relabel_configs:
-      - source_labels: [__address__]
-        regex: "(0x.*)@(.*)"
+      - &parse-node-address
+        source_labels: [__address__]
+        regex: &parse-node-regex "(0x.*)@(.*)@(.*)://(.*):(.*)"
         target_label: "node_address"
         replacement: "${1}"
-      - source_labels: [__address__]
-        regex: "(0x.*@)?(.*)"
-        target_label: "__address__"
+      - &parse-instance
+        source_labels: [__address__]
+        regex: *parse-node-regex
+        target_label: "instance"
         replacement: "${2}"
+      - &parse-ip-address
+        source_labels: [__address__]
+        regex: *parse-node-regex
+        target_label: "ip_address"
+        replacement: "${4}"
+      - &parse-rpc-port
+        source_labels: [__address__]
+        regex: *parse-node-regex
+        target_label: "rpc_port"
+        replacement: "${5}"
+      - &taraxa-node-proxy
+        source_labels: [__address__]
+        regex: *parse-node-regex
+        target_label: "__address__"
+        replacement: "${4}:8080"
 
   - job_name: taraxa_node_cadvisor
     metrics_path: /cadvisor/metrics
@@ -33,28 +50,36 @@ scrape_configs:
     static_configs:
       - targets: [{{TARAXA_NODE_VALIDATORS}}]
     relabel_configs:
-      - source_labels: [__address__]
-        regex: "(0x.*)@(.*)"
-        target_label: "node_address"
-        replacement: "${1}"
-      - source_labels: [__address__]
-        regex: "(0x.*@)?(.*)"
-        target_label: "__address__"
-        replacement: "${2}"
+      - *parse-node-address
+      - *parse-instance
+      - *parse-ip-address
+      - *parse-rpc-port
+      - *taraxa-node-proxy
 
   - job_name: json_chain_stats
     metrics_path: /probe
-    scrape_interval: 1m
+    scrape_interval: 10s
     params:
       module: [chain_stats]
     static_configs:
-      - targets:
-        - https://rpc.mainnet.taraxa.io
+      - targets: ["taraxa-rpc-mainnet@https://rpc.mainnet.taraxa.io:443", {{TARAXA_NODE_VALIDATORS}}]
     relabel_configs:
       - source_labels: [__address__]
+        regex: &parse-node-without-address-regex "(.*@)?([^@]*)@(https?)://(.*):(.*)"
         target_label: __param_target
-      - source_labels: [__param_target]
+        replacement: "${3}://${4}:${5}"
+      - source_labels: [__address__]
+        regex: *parse-node-without-address-regex
         target_label: instance
+        replacement: "${2}"
+      - source_labels: [__address__]
+        regex: *parse-node-without-address-regex
+        target_label: ip_address
+        replacement: "${4}"
+      - source_labels: [__address__]
+        regex: *parse-node-without-address-regex
+        target_label: rpc_port
+        replacement: "${5}"
       - target_label: __address__
         replacement: json_exporter:7979
 
@@ -73,5 +98,24 @@ scrape_configs:
         target_label: "node_address"
       - source_labels: [__address__]
         target_label: "instance"
+      - target_label: __address__
+        replacement: json_exporter:7979
+
+  - job_name: json_rpc_node_status
+    metrics_path: /probe
+    scrape_interval: 10s
+    params:
+      module: [rpc_node_status]
+    static_configs:
+      - targets: [{{TARAXA_NODE_VALIDATORS}}]
+    relabel_configs:
+      - *parse-node-address
+      - *parse-instance
+      - *parse-ip-address
+      - *parse-rpc-port
+      - source_labels: [__address__]
+        target_label: __param_target
+        regex: *parse-node-regex
+        replacement: "${3}://${4}:${5}"
       - target_label: __address__
         replacement: json_exporter:7979
