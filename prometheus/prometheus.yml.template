@@ -83,6 +83,33 @@ scrape_configs:
       - target_label: __address__
         replacement: json_exporter:7979
 
+  - job_name: rpc_node_taraxa_get_version
+    metrics_path: /probe
+    scrape_interval: 300s
+    params:
+      module: [rpc_node_taraxa_get_version]
+    static_configs:
+      - targets: ["taraxa-rpc-mainnet@https://rpc.mainnet.taraxa.io:443", {{TARAXA_NODE_VALIDATORS}}]
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: &parse-node-without-address-regex "(.*@)?([^@]*)@(https?)://(.*):(.*)"
+        target_label: __param_target
+        replacement: "${3}://${4}:${5}"
+      - source_labels: [__address__]
+        regex: *parse-node-without-address-regex
+        target_label: instance
+        replacement: "${2}"
+      - source_labels: [__address__]
+        regex: *parse-node-without-address-regex
+        target_label: ip_address
+        replacement: "${4}"
+      - source_labels: [__address__]
+        regex: *parse-node-without-address-regex
+        target_label: rpc_port
+        replacement: "${5}"
+      - target_label: __address__
+        replacement: json_exporter:7979
+
   - job_name: json_node_stats
     metrics_path: /probe
     scrape_interval: 1m
@@ -119,3 +146,4 @@ scrape_configs:
         replacement: "${3}://${4}:${5}"
       - target_label: __address__
         replacement: json_exporter:7979
+

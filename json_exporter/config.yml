@@ -12,6 +12,24 @@ modules:
         data_source: node_rpc
         rpc_method: taraxa_getChainStats
 
+  rpc_node_taraxa_get_version:
+    body:
+      content: |
+        {"jsonrpc":"2.0","method":"taraxa_getVersion","params":[],"id":1}
+    metrics:
+    - name: rpc_node_taraxa_get_version
+      path: '{ .result }'
+      type: object
+      labels:
+        data_source: node_rpc
+        rpc_method: taraxa_getVersion
+        git_description: '{ .git_description }'
+        git_commit_hash: '{ .git_commit_hash }'
+        git_commit_date: '{ .git_commit_date }'
+        version: '{ .version }'
+      values:
+        result: "1"
+
   rpc_node_status:
     body:
       content: |
