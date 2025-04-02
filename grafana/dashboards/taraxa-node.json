@@ -2667,17 +2667,18 @@
           "type": "prometheus",
           "uid": "tmn_prometheus"
         },
-        "definition": "label_values(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"}, version)",
+        "definition": "label_values(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"},version)",
         "hide": 2,
         "name": "mainnet_version",
         "options": [],
         "query": {
-          "qryType": 5,
-          "query": "label_values(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"}, version)",
+          "qryType": 1,
+          "query": "label_values(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"},version)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
         "regex": "",
+        "sort": 8,
         "type": "query"
       }
     ]
@@ -2690,6 +2691,6 @@
   "timezone": "",
   "title": "Taraxa Mainnet Node (new)",
   "uid": null,
-  "version": 35,
+  "version": 40,
   "weekStart": ""
 }
