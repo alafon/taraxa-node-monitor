@@ -1,5 +1,8 @@
 # TODO
 
+node_id: 8701cf24e3a089bdd61078988cae882f1e4a2258af952318e265302e1879459ee94e0b3f05ea698cea056abb65582da035aecc9401c414366821e405bde9345e
+=== c'est la clé publique
+
 - récupérer la version du noeud et la comparer à la version de rpc.mainnet.taraxa.io
 
 ```
@@ -35,3 +38,5 @@ curl -X 'GET' \
 "0xc4c49f9de78afcc1db2772a4fe8fa461be8820c98c37a7d091090727caaa26fe (2025-03-31T09:50:54.000000Z) gas%:2 tx_c:364 tx_fees:7841774"
 "0x83af75fece33efd5a3c78ba8d1397f8f3d97effa696c911a34c6e0eed53ebcb9 (2025-03-30T20:43:55.000000Z) gas%:2 tx_c:388 tx_fees:8171773"
 ```
+
+- remove labels from cadvisor exporter metrics to avoid different metrics set

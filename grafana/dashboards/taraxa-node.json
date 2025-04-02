@@ -88,7 +88,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "container_fs_usage_bytes{instance=\"$instance\", device=~\"/dev/m.*\", id=\"/\"}/container_fs_limit_bytes{instance=\"$instance\", device=~\"/dev/m.*\", id=\"/\"}*100",
+          "expr": "container_fs_usage_bytes{instance=\"$instance\", device=~\"/dev/.*\", id=\"/\"}/container_fs_limit_bytes{instance=\"$instance\", device=~\"/dev/.*\", id=\"/\"}*100",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -195,7 +195,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "container_fs_usage_bytes{instance=\"$instance\", device=~\"/dev/m.*\", id=\"/\"}",
+          "expr": "container_fs_usage_bytes{instance=\"$instance\", device=~\"/dev/.*\", id=\"/\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -761,7 +761,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 3,
         "x": 0,
         "y": 24
@@ -816,7 +816,7 @@
           },
           "mappings": [],
           "thresholds": {
-            "mode": "percentage",
+            "mode": "absolute",
             "steps": [
               {
                 "color": "red",
@@ -833,7 +833,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 3,
         "x": 3,
         "y": 24
@@ -865,15 +865,148 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "rpc_node_status_pbft_size{instance=\"$instance\"}/$pbft_period_mainnet*100",
+          "expr": "pbft_period{instance=\"$instance\"}",
           "format": "time_series",
           "instant": false,
           "legendFormat": "instance",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "pbft_period{instance=\"taraxa-rpc-mainnet\"}",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Sync status",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "a_100",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "{__name__=\"pbft_period\", data_source=\"node_rpc\", instance=\"taraxa-rpc-mainnet\", ip_address=\"rpc.mainnet.taraxa.io\", job=\"json_chain_stats\", rpc_method=\"taraxa_getChainStats\", rpc_port=\"443\"}"
+                }
+              },
+              "operator": "*",
+              "right": {
+                "fixed": "100"
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "a_100"
+                }
+              },
+              "operator": "/",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "{__name__=\"pbft_period\", data_source=\"node_rpc\", instance=\"taraxa-rpc-mainnet\", ip_address=\"rpc.mainnet.taraxa.io\", job=\"json_chain_stats\", rpc_method=\"taraxa_getChainStats\", rpc_port=\"443\"}"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "tmn_prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 6,
+        "y": 24
+      },
+      "id": 29,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rpc_node_status_peer_count{instance=\"$instance\"}",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Peer count",
       "type": "stat"
     },
     {
@@ -904,12 +1037,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 6,
+        "h": 5,
+        "w": 3,
+        "x": 9,
         "y": 24
       },
-      "id": 36,
+      "id": 30,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -920,7 +1053,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "",
           "values": false
         },
         "showPercentChange": false,
@@ -935,31 +1068,14 @@
             "uid": "tmn_prometheus"
           },
           "editorMode": "code",
-          "exemplar": false,
-          "expr": "max(rpc_node_taraxa_get_version_result{instance=\"$instance\"}) by (version, instance)",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "__auto",
-          "range": false,
+          "expr": "rpc_node_status_node_count{instance=\"$instance\"}",
+          "instant": false,
+          "legendFormat": "node",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Instance version",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "Value": true,
-              "instance": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
-          }
-        }
-      ],
+      "title": "Node count",
       "type": "stat"
     },
     {
@@ -1026,9 +1142,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 10,
+        "h": 5,
+        "w": 9,
+        "x": 12,
         "y": 24
       },
       "id": 23,
@@ -1080,186 +1196,81 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "fixedColor": "green",
             "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "filterable": false,
+            "inspect": false
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "green",
-                "value": 10
+                "color": "#EAB839",
+                "value": 0
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #same_version"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Date (git_commit_date)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 4,
-        "w": 3,
+        "h": 5,
+        "w": 9,
         "x": 0,
-        "y": 28
+        "y": 29
       },
-      "id": 29,
+      "id": 36,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
           "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tmn_prometheus"
-          },
-          "editorMode": "code",
-          "expr": "rpc_node_status_peer_count{instance=\"$instance\"}",
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Peer count",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "tmn_prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 3,
-        "y": 28
-      },
-      "id": 30,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
+          "reducer": [
+            "sum"
           ],
-          "fields": "",
-          "values": false
+          "show": false
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tmn_prometheus"
-          },
-          "editorMode": "code",
-          "expr": "rpc_node_status_node_count{instance=\"$instance\"}",
-          "instant": false,
-          "legendFormat": "node",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Node count",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "tmn_prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 6,
-        "y": 28
-      },
-      "id": 37,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/.*/",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "frameIndex": 0,
+        "showHeader": true
       },
       "pluginVersion": "11.5.2",
       "targets": [
@@ -1270,31 +1281,83 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"}) by (version, instance)",
+          "expr": "rpc_node_taraxa_get_version_result{instance=~\"(taraxa-rpc-mainnet|$instance)\", version=\"$mainnet_version\"}",
           "format": "table",
+          "hide": false,
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
-          "refId": "A"
+          "refId": "same_version"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "rpc_node_taraxa_get_version_result{instance=~\"($instance)\", version!=\"$mainnet_version\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "different_version"
         }
       ],
-      "title": "rpc.mainnet.taraxa.io",
+      "title": "Node versions",
       "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "byVariable": false,
+            "include": {
+              "names": [
+                "git_commit_date",
+                "instance",
+                "version",
+                "Value #same_version"
+              ]
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "boolean",
+                "targetField": "Value #same_version"
+              }
+            ],
+            "fields": {}
+          }
+        },
         {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "Value": true,
-              "instance": true
-            },
+            "excludeByName": {},
             "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
+            "indexByName": {
+              "Value #same_version": 0,
+              "git_commit_date": 3,
+              "instance": 2,
+              "version": 1
+            },
+            "renameByName": {
+              "Value #same_version": "Same version",
+              "git_commit_date": "Date (git_commit_date)",
+              "instance": "Instance",
+              "version": "Version"
+            }
           }
         }
       ],
-      "type": "stat"
+      "type": "table"
     },
     {
       "collapsed": false,
@@ -1302,12 +1365,338 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 34
       },
       "id": 28,
       "panels": [],
       "title": "Indexer stats",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "tmn_prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dateTimeAsLocal"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "since"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeFromNow"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 0,
+        "y": 35
+      },
+      "id": 27,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "indexer_stats_last_pbft_timestamp{node_address=\"$node_address\"}*1000",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "time"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "indexer_stats_last_pbft_timestamp{node_address=\"$node_address\"}*1000",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "since"
+        }
+      ],
+      "title": "Last PBFT block produced",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "tmn_prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 20,
+        "x": 3,
+        "y": 35
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "increase(indexer_stats_pbft_count{node_address=\"$node_address\"}[24h])",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "PBFT blocks produced (24h rolling)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "tmn_prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dateTimeAsLocal"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "since"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeFromNow"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 0,
+        "y": 40
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "indexer_stats_last_dag_timestamp{node_address=\"$node_address\"}*1000",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "time"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "indexer_stats_last_dag_timestamp{node_address=\"$node_address\"}*1000",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "since"
+        }
+      ],
+      "title": "Last DAG block produced",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "tmn_prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 20,
+        "x": 3,
+        "y": 40
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tmn_prometheus"
+          },
+          "editorMode": "code",
+          "expr": "increase(indexer_stats_dags_count{node_address=\"$node_address\"}[24h])",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "DAG blocks produced (24h rolling)",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -1400,9 +1789,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 23,
         "x": 0,
-        "y": 33
+        "y": 45
       },
       "id": 35,
       "options": {
@@ -1452,200 +1841,12 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "tmn_prometheus"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "dateTimeAsLocal"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "since"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeFromNow"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 33
-      },
-      "id": 27,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tmn_prometheus"
-          },
-          "editorMode": "code",
-          "expr": "indexer_stats_last_pbft_timestamp{node_address=\"$node_address\"}*1000",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "time"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tmn_prometheus"
-          },
-          "editorMode": "code",
-          "expr": "indexer_stats_last_pbft_timestamp{node_address=\"$node_address\"}*1000",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "since"
-        }
-      ],
-      "title": "Last PBFT block produced",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "tmn_prometheus"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "dateTimeAsLocal"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "since"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeFromNow"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 37
-      },
-      "id": 26,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tmn_prometheus"
-          },
-          "editorMode": "code",
-          "expr": "indexer_stats_last_dag_timestamp{node_address=\"$node_address\"}*1000",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "time"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tmn_prometheus"
-          },
-          "editorMode": "code",
-          "expr": "indexer_stats_last_dag_timestamp{node_address=\"$node_address\"}*1000",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "since"
-        }
-      ],
-      "title": "Last DAG block produced",
-      "type": "stat"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 53
       },
       "id": 10,
       "panels": [],
@@ -1719,7 +1920,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 42
+        "y": 54
       },
       "id": 1,
       "options": {
@@ -1839,7 +2040,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 42
+        "y": 54
       },
       "id": 2,
       "options": {
@@ -1943,7 +2144,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 42
+        "y": 54
       },
       "id": 3,
       "options": {
@@ -1987,7 +2188,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 62
       },
       "id": 7,
       "panels": [],
@@ -2087,7 +2288,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 51
+        "y": 63
       },
       "id": 6,
       "options": {
@@ -2226,7 +2427,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 51
+        "y": 63
       },
       "id": 5,
       "options": {
@@ -2313,7 +2514,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 51
+        "y": 63
       },
       "id": 4,
       "options": {
@@ -2445,18 +2646,18 @@
           "type": "prometheus",
           "uid": "tmn_prometheus"
         },
-        "definition": "query_result(pbft_period{instance=\"taraxa-rpc-mainnet\"})",
-        "hide": 2,
-        "label": "Current mainnet PBFT period",
-        "name": "pbft_period_mainnet",
+        "definition": "label_values({instance=\"$instance\"},node_address)",
+        "description": "Node address starting with 0x",
+        "label": "Node address",
+        "name": "node_address",
         "options": [],
         "query": {
-          "qryType": 3,
-          "query": "query_result(pbft_period{instance=\"taraxa-rpc-mainnet\"})",
+          "qryType": 1,
+          "query": "label_values({instance=\"$instance\"},node_address)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/[\\s]*\\s(.*)\\s.*/",
+        "regex": "",
         "type": "query"
       },
       {
@@ -2466,30 +2667,29 @@
           "type": "prometheus",
           "uid": "tmn_prometheus"
         },
-        "definition": "label_values({job=\"json_node_stats\"},node_address)",
-        "description": "Node address starting with 0x",
-        "label": "Node address",
-        "name": "node_address",
+        "definition": "label_values(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"}, version)",
+        "hide": 2,
+        "name": "mainnet_version",
         "options": [],
         "query": {
-          "qryType": 1,
-          "query": "label_values({job=\"json_node_stats\"},node_address)",
+          "qryType": 5,
+          "query": "label_values(rpc_node_taraxa_get_version_result{instance=\"taraxa-rpc-mainnet\"}, version)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Taraxa Mainnet Node (new)",
   "uid": null,
-  "version": 29,
+  "version": 35,
   "weekStart": ""
 }
